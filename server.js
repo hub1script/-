@@ -1,21 +1,20 @@
--- [[ WOLF PRIVATE V4.5 - ANTI-SPY EDITION ]] --
--- This script is protected and self-obfuscated to prevent Script Spying
+-- [[ WOLF PRIVATE V4.5 - ANTI-SPY & PROTECTED EDITION ]] --
+-- GitHub Gist Upload Ready
 
 local function PROTECTED_EXECUTION()
-    -- 1. حماية البيئة وتعطيل التجسس
+    -- 1. حماية البيئة وتعطيل التجسس (Anti-Spy Layer)
     local _G = getgenv and getgenv() or _G
     pcall(function()
         if setfflag then
             setfflag("AbuseReportScreenshot", "False")
             setfflag("LuaDebug", "False")
         end
-        -- جعل السكربت غير مرئي للمحاكي
+        -- إخفاء أثر السكربت من المحاكي
         if _G.script then _G.script = nil end
     end)
 
-    -- 2. الكود الأساسي (تم تغليفه داخل دالة محلية لمنع الـ Dump)
+    -- 2. الكود الأساسي (تغليف داخل Local Function لمنع الـ Dump)
     local function START_WOLF_SCRIPT()
-        -- [ بداية كود الواجهة والوظائف ] --
         local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
         local MainFrame = Instance.new("Frame", ScreenGui)
         local TopBar = Instance.new("Frame", MainFrame)
@@ -24,9 +23,9 @@ local function PROTECTED_EXECUTION()
         local ContentFrame = Instance.new("Frame", MainFrame)
         local MinimizeBtn = Instance.new("TextButton", ScreenGui)
 
-        -- إعدادات الحماية للواجهة (تمنع ظهورها في بعض السكربت سباي)
+        -- حماية الواجهة باسم عشوائي (تغيير الهوية)
         ScreenGui.Name = game:GetService("HttpService"):GenerateGUID(false)
-        MainFrame.Name = " " 
+        MainFrame.Name = "Wolf_Internal_Core"
 
         -- [ تصميم الواجهة ] --
         MainFrame.Size = UDim2.new(0, 380, 0, 320)
@@ -108,7 +107,6 @@ local function PROTECTED_EXECUTION()
         AddButton(TabTajmee, "توليد مال (ثغرة السالب)", function()
             local val = tonumber(AmountInput.Text)
             if val then
-                -- حماية الطلب من الكشف
                 pcall(function()
                     game:GetService("ReplicatedStorage").RequestTool:FireServer("Desert Deagle", -val)
                 end)
@@ -118,9 +116,9 @@ local function PROTECTED_EXECUTION()
 
         -- [[ 2. خانة الرسبنة ]] --
         local items = {
-            {"رسبون M4", "M4A1"}, {"رسبون ديقل", "Desert Deagle"}, {"رسبون درع ثقيل", "Heavy Vest"},
-            {"رسبون كلبشة", "Handcuffs"}, {"رسبون راديو", "Radio"}, {"رسبون طلق", "AmmoBox"},
-            {"رسبون كيس", "Filled Packet"}, {"رسبون فايف", "FiveSeven"}, {"رسبون درع خفيف", "Light Vest"}
+            {"M4 رسبون", "M4A1"}, {"ديقل رسبون", "Desert Deagle"}, {"درع ثقيل", "Heavy Vest"},
+            {"كلبشة رسبون", "Handcuffs"}, {"راديو رسبون", "Radio"}, {"طلق رسبون", "AmmoBox"},
+            {"كيس رسبون", "Filled Packet"}, {"فايف رسبون", "FiveSeven"}, {"درع خفيف", "Light Vest"}
         }
         for _, item in pairs(items) do
             AddButton(TabSpawn, item[1], function() game:GetService("ReplicatedStorage").RequestTool:FireServer(item[2], 0) end)
@@ -144,7 +142,7 @@ local function PROTECTED_EXECUTION()
 
         espBtn.MouseButton1Click:Connect(function()
             espActive = not espActive
-            espBtn.Text = espActive and "ACTIVE: ON" or "ACTIVE: OFF"
+            espBtn.Text = espActive and "ESP: ON" or "ESP: OFF"
             espBtn.BackgroundColor3 = espActive and Color3.fromRGB(0, 170, 255) or Color3.fromRGB(55, 55, 55)
         end)
 
@@ -170,7 +168,7 @@ local function PROTECTED_EXECUTION()
             end
         end)
 
-        -- محرك التحديث المستمر
+        -- محرك التحديث المستمر (RenderStepped)
         game:GetService("RunService").RenderStepped:Connect(function()
             for _, p in pairs(game.Players:GetPlayers()) do
                 if p ~= game.Players.LocalPlayer and p.Character then
@@ -179,7 +177,7 @@ local function PROTECTED_EXECUTION()
                     local hrp = char:FindFirstChild("HumanoidRootPart")
                     
                     if hrp and hum then
-                        -- ESP
+                        -- ESP Logic
                         local hl = char:FindFirstChild("DetailedESP")
                         if espActive then
                             if not hl then
@@ -207,7 +205,7 @@ local function PROTECTED_EXECUTION()
                             if hl then hl:Destroy() end
                             if hrp:FindFirstChild("InfoTag") then hrp.InfoTag:Destroy() end
                         end
-                        -- HITBOX
+                        -- HITBOX Logic
                         if hbActive then
                             pcall(function()
                                 hrp.Size = Vector3.new(hbSize, hbSize, hbSize)
@@ -225,13 +223,12 @@ local function PROTECTED_EXECUTION()
         MinimizeBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
     end
 
-    -- 3. تشغيل الكود وحذف الدالة فوراً من الذاكرة
-    local task = task or {spawn = function(f) coroutine.resume(coroutine.create(f)) end}
+    -- 3. تنفيذ الكود ومسح المصدر فوراً (Self-Destruct Source)
     task.spawn(function()
         START_WOLF_SCRIPT()
-        START_WOLF_SCRIPT = nil -- تدمير المصدر
+        START_WOLF_SCRIPT = nil -- حذف الكود من الذاكرة لعدم كشفه بالـ Spy
     end)
 end
 
--- التنفيذ النهائي
+-- التشغيل النهائي
 PROTECTED_EXECUTION()
