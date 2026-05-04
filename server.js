@@ -2,9 +2,8 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// السكربت مع حماية أساسية وإعادة الأوتو كليك
+// السكربت الأساسي
 const myScript = `
-local _0xLog = function(v) return v end -- حماية وهمية لتضليل السبااي
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local MainFrame = Instance.new("Frame", ScreenGui)
 local TopBar = Instance.new("Frame", MainFrame)
@@ -16,7 +15,7 @@ local MinimizeBtn = Instance.new("TextButton", ScreenGui)
 MainFrame.Size = UDim2.new(0, 350, 0, 300)
 MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-MainFrame.Visible = false
+MainFrame.Visible = true -- جعلتها تعمل فوراً للتجربة
 MainFrame.Active = true
 MainFrame.Draggable = true
 Instance.new("UICorner", MainFrame)
@@ -79,7 +78,6 @@ local function AddButton(parent, text, callback)
     b.MouseButton1Click:Connect(callback)
 end
 
--- [[ خانة التجميع المحدثة ]]
 local AmountInput = Instance.new("TextBox", TabTajmee)
 AmountInput.Size = UDim2.new(1, -10, 0, 40)
 AmountInput.PlaceholderText = "اكتب المبلغ هنا"
@@ -95,22 +93,15 @@ AddButton(TabTajmee, "إضافة الفلوس فورا", function()
     end
 end)
 
--- إعادة سكربت الأوتو كليك
 AddButton(TabTajmee, "تشغيل أوتو كليك", function() 
     loadstring(game:HttpGet("https://pastebin.com/raw/eR1HPXfw"))() 
 end)
 
 local items = {
-    {"رسبون M4", "M4A1"},
-    {"رسبون ديقل", "Desert Deagle"},
-    {"رسبون كلبشة", "Handcuffs"},
-    {"رسبون راديو", "Radio"},
-    {"رسبون طلق", "AmmoBox"},
-    {"رسبون كيس", "Filled Packet"},
-    {"رسبون مفتاح مركز", "مفتاح المركز"},
-    {"رسبون فايف", "FiveSeven"},
-    {"رسبون درع خفيف", "Light Vest"},
-    {"رسبون درع ثقيل", "Heavy Vest"}
+    {"رسبون M4", "M4A1"}, {"رسبون ديقل", "Desert Deagle"}, {"رسبون كلبشة", "Handcuffs"},
+    {"رسبون راديو", "Radio"}, {"رسبون طلق", "AmmoBox"}, {"رسبون كيس", "Filled Packet"},
+    {"رسبون مفتاح مركز", "مفتاح المركز"}, {"رسبون فايف", "FiveSeven"},
+    {"رسبون درع خفيف", "Light Vest"}, {"رسبون درع ثقيل", "Heavy Vest"}
 }
 for _, item in pairs(items) do
     AddButton(TabSpawn, item[1], function() game:GetService("ReplicatedStorage").RequestTool:FireServer(item[2], 0) end)
@@ -121,18 +112,22 @@ MinimizeBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFra
 `;
 
 app.get('/raw', (req, res) => {
-    // حماية إضافية: تحويل الكود إلى Base64 عند الإرسال لتصعيب قراءته على الـ Spy
-    const encodedScript = Buffer.from(myScript).toString('base64');
-    const wrapper = `loadstring(game:GetService("HttpService"):Base64Decode("${encodedScript}"))()`;
+    // تشفير بسيط بالنص العكسي لضمان عمل loadstring بدون تعقيد Base64 الزائد
+    const encoded = myScript.split("").reverse().join("");
+    const finalWrapper = `
+        local data = "${encoded.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"
+        local function reverse(s)
+            local res = ""
+            for i = #s, 1, -1 do res = res .. s:sub(i,i) end
+            return res
+        end
+        loadstring(reverse(data))()
+    `;
     
     res.set('Content-Type', 'text/plain');
-    res.send(wrapper);
+    res.send(finalWrapper);
 });
 
-app.get('/', (req, res) => {
-    res.send('API Active');
-});
+app.get('/', (req, res) => res.send('Server Online'));
 
-app.listen(PORT, () => {
-    console.log('Server running on ' + PORT);
-});
+app.listen(PORT, () => console.log('Port: ' + PORT));
