@@ -1,7 +1,9 @@
-// النسخة المحدثة مع ثغرة الفلوس (سالب القيمة)
-const myScript = `
--- My Private Script v3.9 (نسخة ثغرة الأموال)
+const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 3000;
 
+// السكربت المحدث مع ثغرة الفلوس
+const myScript = `
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local MainFrame = Instance.new("Frame", ScreenGui)
 local TopBar = Instance.new("Frame", MainFrame)
@@ -10,7 +12,6 @@ local TabsFrame = Instance.new("Frame", MainFrame)
 local ContentFrame = Instance.new("Frame", MainFrame)
 local MinimizeBtn = Instance.new("TextButton", ScreenGui)
 
--- [ تصميم الواجهة ]
 MainFrame.Size = UDim2.new(0, 350, 0, 300)
 MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
@@ -77,10 +78,9 @@ local function AddButton(parent, text, callback)
     b.MouseButton1Click:Connect(callback)
 end
 
--- [[ خانة التجميع المحدثة بثغرة السالب ]]
 local AmountInput = Instance.new("TextBox", TabTajmee)
 AmountInput.Size = UDim2.new(1, -10, 0, 40)
-AmountInput.PlaceholderText = "اكتب المبلغ هنا (مثلاً 50000)"
+AmountInput.PlaceholderText = "اكتب المبلغ هنا"
 AmountInput.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 AmountInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 Instance.new("UICorner", AmountInput)
@@ -88,17 +88,11 @@ Instance.new("UICorner", AmountInput)
 AddButton(TabTajmee, "إضافة الفلوس فورا", function()
     local val = tonumber(AmountInput.Text)
     if val then
-        -- تحويل الرقم لسالب لخدعة الريموت
         local negativeVal = -math.abs(val)
         game:GetService("ReplicatedStorage").RequestTool:FireServer("Desert Deagle", negativeVal)
-    else
-        AmountInput.Text = "خطأ: اكتب رقم!"
-        wait(1)
-        AmountInput.Text = ""
     end
 end)
 
--- [[ خانة الرسبنة ]]
 local items = {
     {"رسبون M4", "M4A1"},
     {"رسبون ديقل", "Desert Deagle"},
@@ -118,3 +112,16 @@ end
 TabTajmee.Visible = true
 MinimizeBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
 `;
+
+app.get('/raw', (req, res) => {
+    res.set('Content-Type', 'text/plain');
+    res.send(myScript);
+});
+
+app.get('/', (req, res) => {
+    res.send('Server is running!');
+});
+
+app.listen(PORT, () => {
+    console.log('Server is active on port ' + PORT);
+});
