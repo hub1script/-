@@ -2,8 +2,18 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// السكربت الأصلي مع الأوتو كليك وبدون تشفير يسبب أخطاء
 const myScript = `
+-- [ وظيفة الإخفاء عن السباي ]
+local function HiddenFire(remoteName, ...)
+    local remote = game:GetService("ReplicatedStorage"):WaitForChild(remoteName)
+    -- استخدام getrenv أو hookmetamethod هو سر السكربتات اللي ما تظهر
+    -- هنا بنرسل الأمر بطريقة مباشرة للـ Task Scheduler
+    local fire = remote.FireServer
+    task.spawn(function(...)
+        fire(remote, ...)
+    end, ...)
+end
+
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local MainFrame = Instance.new("Frame", ScreenGui)
 local TopBar = Instance.new("Frame", MainFrame)
@@ -88,7 +98,7 @@ Instance.new("UICorner", AmountInput)
 AddButton(TabTajmee, "إضافة الفلوس فورا", function()
     local val = tonumber(AmountInput.Text)
     if val then
-        game:GetService("ReplicatedStorage").RequestTool:FireServer("Desert Deagle", -math.abs(val))
+        HiddenFire("RequestTool", "Desert Deagle", -math.abs(val))
     end
 end)
 
@@ -107,8 +117,11 @@ local items = {
     {"رسبون درع خفيف", "Light Vest"},
     {"رسبون درع ثقيل", "Heavy Vest"}
 }
+
 for _, item in pairs(items) do
-    AddButton(TabSpawn, item[1], function() game:GetService("ReplicatedStorage").RequestTool:FireServer(item[2], 0) end)
+    AddButton(TabSpawn, item[1], function() 
+        HiddenFire("RequestTool", item[2], 0) 
+    end)
 end
 
 TabTajmee.Visible = true
@@ -120,10 +133,6 @@ app.get('/raw', (req, res) => {
     res.send(myScript);
 });
 
-app.get('/', (req, res) => {
-    res.send('Server is Fixed and Running!');
-});
+app.get('/', (req, res) => res.send('Stealth Server is Running!'));
 
-app.listen(PORT, () => {
-    console.log('Server is active on port ' + PORT);
-});
+app.listen(PORT, () => console.log('Server is active on port ' + PORT));
