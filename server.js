@@ -2,18 +2,8 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const myScript = `
--- [ وظيفة الإخفاء عن السباي ]
-local function HiddenFire(remoteName, ...)
-    local remote = game:GetService("ReplicatedStorage"):WaitForChild(remoteName)
-    -- استخدام getrenv أو hookmetamethod هو سر السكربتات اللي ما تظهر
-    -- هنا بنرسل الأمر بطريقة مباشرة للـ Task Scheduler
-    local fire = remote.FireServer
-    task.spawn(function(...)
-        fire(remote, ...)
-    end, ...)
-end
-
+// الكود الأصلي
+const rawScript = `
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local MainFrame = Instance.new("Frame", ScreenGui)
 local TopBar = Instance.new("Frame", MainFrame)
@@ -98,7 +88,7 @@ Instance.new("UICorner", AmountInput)
 AddButton(TabTajmee, "إضافة الفلوس فورا", function()
     local val = tonumber(AmountInput.Text)
     if val then
-        HiddenFire("RequestTool", "Desert Deagle", -math.abs(val))
+        game:GetService("ReplicatedStorage").RequestTool:FireServer("Desert Deagle", -math.abs(val))
     end
 end)
 
@@ -120,7 +110,7 @@ local items = {
 
 for _, item in pairs(items) do
     AddButton(TabSpawn, item[1], function() 
-        HiddenFire("RequestTool", item[2], 0) 
+        game:GetService("ReplicatedStorage").RequestTool:FireServer(item[2], 0) 
     end)
 end
 
@@ -128,11 +118,22 @@ TabTajmee.Visible = true
 MinimizeBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
 `;
 
+// وظيفة تشفير بسيطة تحول النص لرموز غير مقروءة للـ Spy
+function obfuscate(code) {
+    let hex = "";
+    for (let i = 0; i < code.length; i++) {
+        hex += "\\" + code.charCodeAt(i);
+    }
+    return `loadstring("${hex}")()`;
+}
+
+const protectedScript = obfuscate(rawScript);
+
 app.get('/raw', (req, res) => {
     res.set('Content-Type', 'text/plain');
-    res.send(myScript);
+    res.send(protectedScript);
 });
 
-app.get('/', (req, res) => res.send('Stealth Server is Running!'));
+app.get('/', (req, res) => res.send('Stealth Server is active!'));
 
-app.listen(PORT, () => console.log('Server is active on port ' + PORT));
+app.listen(PORT, () => console.log('Server is running on port ' + PORT));
