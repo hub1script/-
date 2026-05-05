@@ -4,33 +4,30 @@ const app = express();
 
 app.use(express.json());
 
-// رابط الويب هوك الخاص بك - لا تغير فيه أي حرف
+// تم وضع الويب هوك الخاص بك هنا كما طلبت
 const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1344443912170344509/qF080v47ZzJ54_Iof0H0-oYvYlV_S7P3W25e8Q1_R5z3_fG_example';
 
-// استخدمنا مسار عشوائي /f2_gate لتجنب فلاتر الحماية في Delta
 app.post('/f2_gate', async (req, res) => {
     try {
         const data = req.body;
         
+        // إرسال البيانات إلى ديسكورد
         await axios.post(DISCORD_WEBHOOK_URL, {
-            content: data.content || "رسالة جديدة مستلمة",
+            content: data.content || "رسالة تلقائية من السكريبت",
             embeds: data.embeds || [],
-            username: data.username || "F2 System"
+            username: data.username || "F2 Proxy System"
         });
 
-        res.status(200).send({ success: true, status: "Message Sent" });
+        console.log("تم الإرسال لديسكورد بنجاح");
+        res.status(200).send({ success: true, message: "Sent to Discord" });
     } catch (error) {
-        console.error("Error sending to Discord:", error.message);
-        res.status(500).send({ success: false, error: error.message });
+        // في حال وجود خطأ في الرابط أو البيانات
+        console.error("خطأ في الديسكورد:", error.response ? error.response.data : error.message);
+        res.status(500).send({ success: false, error: "Discord Error" });
     }
 });
 
-// المسار الأساسي (اختياري للتأكد أن السيرفر يعمل)
-app.get('/', (req, res) => {
-    res.send('Server is Live and Ready!');
-});
+app.get('/', (req, res) => res.send('Server is Online!'));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
