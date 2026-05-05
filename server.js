@@ -1,37 +1,31 @@
 const express = require('express');
+const axios = require('axios');
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// الرابط عبر وسيط Hyra لضمان التوصيل
-const webhookUrl = "https://hooks.hyra.io/api/webhooks/1500997210794365000/b3XsDU-dBJ874IPO1pZUK91CWwfk76K7HwzhMkz3ySt9WMKQHNQdheuBIMyFDd1HnwAb";
+app.use(express.json());
 
-const testScript = `
-local http = game:GetService("HttpService")
-local player = game.Players.LocalPlayer
+// الرابط الذي طلبته وضعه هنا
+const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1344443912170344509/qF080v47ZzJ54_Iof0H0-oYvYlV_S7P3W25e8Q1_R5z3_fG_example'; // تم تحديث الرابط كما طلبت
 
-local data = {
-    ["content"] = "✅ **وصلت الرسالة! السيرفر والويب هوك شغالين تمام**",
-    ["embeds"] = {{
-        ["title"] = "تجربة اتصال ناجحة",
-        ["description"] = "اللاعب: " .. player.Name .. "\\nالآي بي: جاري السحب...",
-        ["color"] = 65280
-    }}
-}
+app.post('/send-data', async (req, res) => {
+    try {
+        const data = req.body;
+        
+        // إرسال البيانات إلى ديسكورد عبر السيرفر
+        await axios.post(DISCORD_WEBHOOK_URL, {
+            content: data.content || "رسالة تلقائية من السكريبت",
+            embeds: data.embeds || [],
+            username: data.username || "Delta Logger"
+        });
 
-local success, err = pcall(function()
-    return http:PostAsync("${webhookUrl}", http:JSONEncode(data))
-end)
-
-if success then
-    print("F2: تم إرسال التنبيه لديسكورد بنجاح!")
-else
-    warn("F2: فشل الإرسال. الخطأ: " .. tostring(err))
-end
-`;
-
-app.get('/raw', (req, res) => {
-    res.set('Content-Type', 'text/plain');
-    res.send(testScript);
+        res.status(200).send({ success: true, message: "تم الإرسال بنجاح عبر السيرفر" });
+    } catch (error) {
+        console.error("خطأ أثناء الإرسال:", error.message);
+        res.status(500).send({ success: false, error: error.message });
+    }
 });
 
-app.listen(PORT, () => console.log('Test Server is Live!'));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
