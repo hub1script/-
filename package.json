@@ -1,7 +1,6 @@
 {
-  "name": "delta-proxy",
+  "name": "proxy-f2",
   "version": "1.0.0",
-  "description": "Discord Webhook Proxy for Delta",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
