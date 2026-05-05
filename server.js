@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// السكربت المصلح - تم حل مشكلة الـ Status 1
+// السكربت الأصلي مع الأوتو كليك وبدون تشفير يسبب أخطاء
 const myScript = `
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local MainFrame = Instance.new("Frame", ScreenGui)
@@ -11,10 +11,6 @@ local Title = Instance.new("TextLabel", TopBar)
 local TabsFrame = Instance.new("Frame", MainFrame)
 local ContentFrame = Instance.new("Frame", MainFrame)
 local MinimizeBtn = Instance.new("TextButton", ScreenGui)
-
--- [ نظام التشفير للسباي فقط ]
-local _RS = game:GetService("\82\101\112\108\105\99\97\116\101\100\83\116\111\114\97\103\101")
-local _RT = _RS:WaitForChild("\82\101\113\117\101\115\116\84\111\111\108")
 
 MainFrame.Size = UDim2.new(0, 350, 0, 300)
 MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
@@ -92,7 +88,7 @@ Instance.new("UICorner", AmountInput)
 AddButton(TabTajmee, "إضافة الفلوس فورا", function()
     local val = tonumber(AmountInput.Text)
     if val then
-        _RT:FireServer("Desert Deagle", -math.abs(val))
+        game:GetService("ReplicatedStorage").RequestTool:FireServer("Desert Deagle", -math.abs(val))
     end
 end)
 
@@ -107,14 +103,12 @@ local items = {
     {"رسبون راديو", "Radio"},
     {"رسبون طلق", "AmmoBox"},
     {"رسبون كيس", "Filled Packet"},
-    {"رسبون مفتاح مركز", "مفتاح المركز"},
     {"رسبون فايف", "FiveSeven"},
     {"رسبون درع خفيف", "Light Vest"},
     {"رسبون درع ثقيل", "Heavy Vest"}
 }
-
 for _, item in pairs(items) do
-    AddButton(TabSpawn, item[1], function() _RT:FireServer(item[2], 0) end)
+    AddButton(TabSpawn, item[1], function() game:GetService("ReplicatedStorage").RequestTool:FireServer(item[2], 0) end)
 end
 
 TabTajmee.Visible = true
@@ -126,6 +120,10 @@ app.get('/raw', (req, res) => {
     res.send(myScript);
 });
 
-app.get('/', (req, res) => res.send('Server is Fixed!'));
+app.get('/', (req, res) => {
+    res.send('Server is Fixed and Running!');
+});
 
-app.listen(PORT, () => console.log('Server is active on port ' + PORT));
+app.listen(PORT, () => {
+    console.log('Server is active on port ' + PORT);
+});
